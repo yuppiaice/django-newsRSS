@@ -4,24 +4,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>ログイン</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', 'ヒラギノ角ゴ ProN', 'Hiragino Kaku Gothic ProN', 'メイリオ', Meiryo, sans-serif;
+            background: #f7f7fa;
+            margin: 0;
+            padding: 0;
+            color: #222;
+        }
+        .login-container {
+            max-width: 400px;
+            margin: 3rem auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            padding: 2.5rem 2rem 2rem 2rem;
+        }
+        h2 {
+            text-align: center;
+            color: #343a40;
+            margin-bottom: 2rem;
+        }
+        label {
+            font-weight: bold;
+        }
+        input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 0.7em;
+            margin-top: 0.3em;
+            margin-bottom: 1.2em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        button[type="submit"] {
+            width: 100%;
+            background: #343a40;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 0.8em 0;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 0.5em;
+            transition: background 0.2s;
+        }
+        button[type="submit"]:hover {
+            background: #23272b;
+        }
+        a {
+            display: block;
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #343a40;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 
 <body>
-    <h2>ログイン</h2>
-    <form method="post">
-        {% csrf_token %}
-        <p>
-            <label for="id_email">メールアドレス:</label><br>
-            {{ form.email }}
-        </p>
-        <p>
-            <label for="id_password">パスワード:</label><br>
-            {{ form.password }}
-        </p>
-        <button type="submit">ログイン</button>
-    </form>
-    <a href="{% url 'myapp:signup' %}">サインアップはこちら</a>
+    <div class="login-container">
+        <h2>ログイン</h2>
+        <form method="post">
+            {% csrf_token %}
+            <p>
+                <label for="id_email">メールアドレス:</label><br>
+                {{ form.email }}
+            </p>
+            <p>
+                <label for="id_password">パスワード:</label><br>
+                {{ form.password }}
+            </p>
+            <button type="submit">ログイン</button>
+        </form>
+        <a href="{% url 'myapp:signup' %}">サインアップはこちら</a>
+    </div>
 </body>
 
 </html>

@@ -111,6 +111,108 @@
             align-items: center;
             margin-bottom: 1.5em;
         }
+        .search-form-bar {
+            display: flex;
+            gap: 1em;
+            align-items: flex-end;
+            margin-bottom: 2em;
+            flex-wrap: wrap;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            padding: 1.2em 1.5em 1em 1.5em;
+        }
+        .search-form-bar > div {
+            min-width: 120px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2em;
+        }
+        .search-form-bar label {
+            font-size: 0.95em;
+            color: #333;
+            margin-bottom: 0.2em;
+            font-weight: auto;
+        }
+        .search-form-bar input[type="text"],
+        .search-form-bar select,
+        .search-form-bar input[type="date"] {
+            font-weight: auto;
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            padding: 0.5em 1em;
+            font-size: 1em;
+            background: #f7f7fa;
+            transition: border 0.2s, box-shadow 0.2s;
+        }
+        .search-form-bar input[type="text"]:focus,
+        .search-form-bar select:focus,
+        .search-form-bar input[type="date"]:focus {
+            border: 1.5px solid #007bff;
+            box-shadow: 0 0 0 2px #007bff22;
+            outline: none;
+        }
+        .search-form-bar .fetch-news-btn {
+            margin-bottom: 0;
+            min-width: 90px;
+            font-size: 1em;
+            padding: 0.6em 1.2em;
+            border-radius: 6px;
+            background: #414345;
+            color: #e0e0e0;;
+            border: none;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0,123,255,0.08);
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4em;
+        }
+        .search-form-bar .fetch-news-btn:hover {
+            transform: translateY(-2px) scale(1.04);
+            background: #414345;
+            color: #e0e0e0;;
+        }
+        .search-form-bar .reset-btn {
+            background: #e0e0e0;
+            color: #333;
+            border: none;
+            font-weight: 500;
+            margin-left: 0.5em;
+            transition: background 0.2s, color 0.2s;
+        }
+        .search-form-bar .reset-btn:hover {
+            background: #bbb;
+            color: #222;
+        }
+        @media (max-width: 600px) {
+            .search-form-bar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.7em;
+                padding: 1em 0.5em 0.7em 0.5em;
+            }
+            .search-form-bar > div {
+                min-width: unset;
+            }
+            .search-form-bar input[type="text"] {
+                width: 100%;
+            }
+        }
+        #back-to-top a {
+            background: #343a40;
+            color: #fff;
+            padding: 0.7em 1.2em;
+            border-radius: 24px;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            transition: background 0.2s;
+        }
+        #back-to-top a:hover {
+            background: #007bff;
+        }
     </style>
 </head>
 
@@ -144,12 +246,73 @@
                 </form>
             </div>
             <div>
-                <form method="post" action="{% url 'myapp:serch_news' %}" style="margin: 0">
+                <form method="post" action="{% url 'myapp:serch_news' %}" class="search-form-bar" style="margin: 0;">
                     {% csrf_token %}
-                    {form.as_p}
-                    <button type="submit" class="fetch-news-btn">ニュースを取得</button>
+                    <div>
+                        <label for="id_query">🔍 検索</label>
+                        {{ form.query }}
+                    </div>
+                    <div>
+                        <label for="id_search_type">対象</label>
+                        {{ form.search_type }}
+                    </div>
+                    <div id="period-fields" style="display:none; gap:0.5em;">
+                        <div>
+                            <label for="id_date_from">開始日</label>
+                            {{ form.date_from }}
+                        </div>
+                        <div>
+                            <label for="id_date_to">終了日</label>
+                            {{ form.date_to }}
+                        </div>
+                    </div>
+                    <button type="submit" class="fetch-news-btn">
+                        <span style="display:inline-flex;align-items:center;">
+                            <svg width="18" height="18" fill="#fff" viewBox="0 0 24 24" style="margin-right:0.2em;"><path d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+                            検索
+                        </span>
+                    </button>
+                    <a href="{% url 'myapp:home' %}" class="fetch-news-btn reset-btn" style="text-align:center; text-decoration:none; line-height:2.2em; margin-left: auto;">
+                        リセット
+                    </a>
                 </form>
-
+                <!-- フィルター機能追加 -->
+                <form method="get" id="filter-form" style="margin: 1em 0 2em 0; text-align:right;">
+                  <label for="filter-select" style="font-weight:bold; margin-right:0.5em;">フィルター:</label>
+                  <select name="filter" id="filter-select" style="padding:0.4em 1em; border-radius:6px;">
+                    <option value="" {% if not request.GET.filter %}selected{% endif %}>デフォルト</option>
+                    <option value="all" {% if request.GET.filter == 'all' %}selected{% endif %}>全表示</option>
+                    <option value="unread" {% if request.GET.filter == 'unread' %}selected{% endif %}>既読を非表示</option>
+                    <option value="favorite" {% if request.GET.filter == 'favorite' %}selected{% endif %}>お気に入りのみ表示</option>
+                    <option value="read" {% if request.GET.filter == 'read' %}selected{% endif %}>既読のみ表示</option>
+                    <option value="unread_favorite" {% if request.GET.filter == 'unread_favorite' %}selected{% endif %}>未読かつお気に入りのみ表示</option>
+                    <option value="read_favorite" {% if request.GET.filter == 'read_favorite' %}selected{% endif %}>既読かつお気に入りのみ表示</option>
+                  </select>
+                </form>
+                <script>
+                // 検索対象が「期間」のときだけ日付欄を表示
+                function togglePeriodFields() {
+                    var searchType = document.getElementById('id_search_type');
+                    var periodFields = document.getElementById('period-fields');
+                    if (searchType && periodFields) {
+                        if (searchType.value === 'period') {
+                            periodFields.style.display = 'flex';
+                        } else {
+                            periodFields.style.display = 'none';
+                        }
+                    }
+                }
+                document.addEventListener('DOMContentLoaded', function() {
+                    var searchType = document.getElementById('id_search_type');
+                    if (searchType) {
+                        searchType.addEventListener('change', togglePeriodFields);
+                        togglePeriodFields();
+                    }
+                });
+                document.getElementById('filter-select').addEventListener('change', function() {
+                    document.getElementById('filter-form').submit();
+                });
+                </script>
             </div>
         </div>
 
@@ -200,9 +363,13 @@
         {% else %}
             <p>ニュースはありません。</p>
         {% endif %}
+        
+        <!-- 右下固定のページトップへ戻るボタン -->
+        <div id="back-to-top" style="display:none; position:fixed; right:30px; bottom:30px; z-index:999;">
+          <a href="#">ページトップへ戻る</a>
+        </div>
     </main>
     <footer>
-        &copy; 2024 ニュースアプリ
     </footer>
     <script>
         function markAsRead(newsId, event) {
@@ -339,6 +506,21 @@
             document.querySelectorAll('.menu').forEach(m => {
                 if (!m.classList.contains('user-menu')) m.style.display = "none";
             });
+        });
+
+        // スクロールで「ページトップへ戻る」表示切替
+        window.addEventListener('scroll', function() {
+            var backToTop = document.getElementById('back-to-top');
+            if (window.scrollY > 250) {
+                backToTop.style.display = 'block';
+            } else {
+                backToTop.style.display = 'none';
+            }
+        });
+        // クリックでトップへ戻る
+        document.getElementById('back-to-top').addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({top: 0, behavior: 'smooth'});
         });
     </script>
 </body>

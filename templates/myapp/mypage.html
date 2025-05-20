@@ -4,6 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>マイページ</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', 'ヒラギノ角ゴ ProN', 'Hiragino Kaku Gothic ProN', 'メイリオ', Meiryo, sans-serif;
+            background: #f7f7fa;
+            margin: 0;
+            padding: 0;
+            color: #222;
+        }
+        header {
+            background: #343a40;
+            color: #fff;
+            padding: 1.5rem 0 1rem 0;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        }
+        main {
+            max-width: 480px;
+            margin: 2rem auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            padding: 2rem 2.5rem 2rem 2.5rem;
+        }
+        main h2 {
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        p {
+            margin: 0.7em 0;
+            font-size: 1.08em;
+        }
+        a {
+            display: inline-block;
+            margin-top: 1.5rem;
+            padding: 0.6em 1.5em;
+            background: #343a40;
+            color: #fff;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        a:hover {
+            background: #343a40;
+        }
+        footer {
+            text-align: center;
+            color: #888;
+            font-size: 0.95em;
+            margin: 2.5rem 0 1rem 0;
+        }
+
+        
+    </style>
 </head>
 <body>
     <header>
@@ -12,12 +67,12 @@
     <main>
         <h2>ユーザー情報</h2>
         <p>ユーザー名: {{ user.username }}</p>
-        <p>ユーザーID: {{ user.id }}</p>
+        {% comment %} <p>ユーザーID: {{ user.id }}</p> {% endcomment %}
         <p>メールアドレス: {{ user.email }}</p>
         <p>ニュースの総数: {{ news_count }}</p>
         <p>既読ニュース数: {{ read_count }}</p>
         <p>お気に入りニュース数: {{ favorite_count }}</p>
-        
+        <a href="{% url 'myapp:default_setting' %}">デフォルト表示設定</a>
         <a href="{% url 'myapp:logout' %}">ログアウト</a>
     </main>
     <footer>

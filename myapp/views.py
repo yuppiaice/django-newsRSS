@@ -1,21 +1,47 @@
 from django.http import HttpResponse
 from django.http import JsonResponse
+from .forms import DefaultSettingForm, UserProfileForm
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from .forms import CustomUserCreationForm, EmailAuthenticationForm
+from .forms import CustomUserCreationForm, EmailAuthenticationForm, SearchNewsForm
 from django.contrib.auth.models import User
 import xml.etree.ElementTree as ET
 from django.utils import timezone
-from .models import RssNews
+from .models import RssNews, DefaultSetting, UserProfile
 import requests
 import json
 
 @login_required
 def home(request):
-    news_list = RssNews.objects.filter(user=request.user).order_by('-pubdate')
-    return render(request, 'myapp/home.html', {'news_list': news_list})
+    user = request.user
+    # 最新の設定を取得
+    try:
+        setting = DefaultSetting.objects.filter(user=user).latest('id')
+        default_filter = setting.default_filter
+    except DefaultSetting.DoesNotExist:
+        default_filter = 'all'
+
+    # GETパラメータがあればそれを優先、なければdefault_filterを使う
+    filter_type = request.GET.get('filter')
+    if not filter_type:
+        filter_type = default_filter
+
+    news_list = RssNews.objects.filter(user=user).order_by('-pubdate')
+    if filter_type == 'unread':
+        news_list = news_list.filter(read=False)
+    elif filter_type == 'favorite':
+        news_list = news_list.filter(favorite=True)
+    elif filter_type == 'read':
+        news_list = news_list.filter(read=True)
+    elif filter_type == 'unread_favorite':
+        news_list = news_list.filter(read=False, favorite=True)
+    elif filter_type == 'read_favorite':
+        news_list = news_list.filter(read=True, favorite=True)
+    # 検索フォームの初期化
+    search_form = SearchNewsForm()
+    return render(request, 'myapp/home.html', {'news_list': news_list, 'form': search_form, 'default_filter': filter_type})
 
 def signup(request):
     if request.method == 'POST':
@@ -48,10 +74,30 @@ def login(request):
 
 @login_required
 def mypage(request):
+    try:
+        profile = UserProfile.objects.get(user=request.user)
+    except UserProfile.DoesNotExist:
+        profile = UserProfile.objects.create(user=request.user)
+
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('myapp:mypage')
+    else:
+        form = UserProfileForm(instance=profile)
+
     news_count = RssNews.objects.filter(user=request.user).count()
     read_count = RssNews.objects.filter(user=request.user, read=True).count()
     favorite_count = RssNews.objects.filter(user=request.user, favorite=True).count()
-    return render(request, 'myapp/mypage.html', {'news_count': news_count, 'read_count': read_count, 'favorite_count': favorite_count})
+    
+    return render(request, 'myapp/mypage.html', {
+        'news_count': news_count, 
+        'read_count': read_count, 
+        'favorite_count': favorite_count,
+        'form': form,
+        'profile': profile
+    })
 
 @login_required
 def logout(request):
@@ -157,3 +203,46 @@ def delete_favorite(request):
         except RssNews.DoesNotExist:
             return JsonResponse({"success": False, "error": "Not found"})
     return JsonResponse({"success": False, "error": "Invalid request"})
+
+@login_required
+def serch_news(request):
+    if request.method == 'POST':
+        form = SearchNewsForm(request.POST)
+        news_list = RssNews.objects.filter(user=request.user)
+        if form.is_valid():
+            search_type = form.cleaned_data.get('search_type')
+            query = form.cleaned_data.get('query')
+            date_from = form.cleaned_data.get('date_from')
+            date_to = form.cleaned_data.get('date_to')
+            if search_type == 'title' and query:
+                news_list = news_list.filter(title__icontains=query)
+            elif search_type == 'category' and query:
+                news_list = news_list.filter(category__icontains=query)
+            elif search_type == 'period':
+                if date_from:
+                    news_list = news_list.filter(pubdate__gte=date_from)
+                if date_to:
+                    news_list = news_list.filter(pubdate__lte=date_to)
+        return render(request, 'myapp/home.html', {'news_list': news_list, 'form': form})
+    else:
+        return redirect('myapp:home')
+
+@login_required
+def default_setting(request):
+    if request.method == 'POST':
+        form = DefaultSettingForm(request.POST)
+        if form.is_valid():
+            # 既存の設定を削除してから新しい設定を保存
+            DefaultSetting.objects.filter(user=request.user).delete()
+            setting = form.save(commit=False)
+            setting.user = request.user
+            setting.save()
+            return redirect('myapp:home')
+    else:
+        # 既存の設定があれば取得
+        try:
+            setting = DefaultSetting.objects.filter(user=request.user).latest('id')
+            form = DefaultSettingForm(instance=setting)
+        except DefaultSetting.DoesNotExist:
+            form = DefaultSettingForm()
+    return render(request, 'myapp/default_setting.html', {'form': form})

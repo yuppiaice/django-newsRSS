@@ -19,14 +19,13 @@ class RssNews(models.Model):
     def __str__(self):
         return self.title
 
-# class User(AbstractUser):
-#     # id = models.IntegerField(primary_key=True, default=createid, unique=True)
-#     # name = models.CharField(max_length=100)
-#     # email = models.EmailField(max_length=100, unique=True)
-#     # password = models.CharField(max_length=100)
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
+class DefaultSetting(models.Model):
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    default_filter = models.CharField(max_length=100, default='all')
 
-#     def __str__(self):
-#         return self.username
-
+class UserProfile(models.Model):
+    user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE)
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+    
+    def __str__(self):
+        return self.user.username
