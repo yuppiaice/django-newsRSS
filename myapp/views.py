@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.http import JsonResponse
-from .forms import DefaultSettingForm, UserProfileForm
+from .forms import DefaultSettingForm
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
@@ -9,7 +9,7 @@ from .forms import CustomUserCreationForm, EmailAuthenticationForm, SearchNewsFo
 from django.contrib.auth.models import User
 import xml.etree.ElementTree as ET
 from django.utils import timezone
-from .models import RssNews, DefaultSetting, UserProfile
+from .models import RssNews, DefaultSetting
 import requests
 import json
 
@@ -74,30 +74,10 @@ def login(request):
 
 @login_required
 def mypage(request):
-    try:
-        profile = UserProfile.objects.get(user=request.user)
-    except UserProfile.DoesNotExist:
-        profile = UserProfile.objects.create(user=request.user)
-
-    if request.method == 'POST':
-        form = UserProfileForm(request.POST, request.FILES, instance=profile)
-        if form.is_valid():
-            form.save()
-            return redirect('myapp:mypage')
-    else:
-        form = UserProfileForm(instance=profile)
-
     news_count = RssNews.objects.filter(user=request.user).count()
     read_count = RssNews.objects.filter(user=request.user, read=True).count()
     favorite_count = RssNews.objects.filter(user=request.user, favorite=True).count()
-    
-    return render(request, 'myapp/mypage.html', {
-        'news_count': news_count, 
-        'read_count': read_count, 
-        'favorite_count': favorite_count,
-        'form': form,
-        'profile': profile
-    })
+    return render(request, 'myapp/mypage.html', {'news_count': news_count, 'read_count': read_count, 'favorite_count': favorite_count})
 
 @login_required
 def logout(request):

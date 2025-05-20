@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import DefaultSetting, UserProfile
+from .models import DefaultSetting
 
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True, label='メールアドレス')
@@ -59,4 +59,3 @@ class DefaultSettingForm(forms.ModelForm):
     class Meta:
         model = DefaultSetting
         fields = ['default_filter']
-
