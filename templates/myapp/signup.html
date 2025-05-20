@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h2>新規登録</h2>
+    <p>ユーザー名・メールアドレス・パスワードを入力して新規登録してください。</p>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">新規登録</button>
+    </form>
+    <a href="{% url 'myapp:login' %}">ログインはこちら</a>
+</body>
+</html>

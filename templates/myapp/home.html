@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ニュース一覧</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f8f9fa;
+        }
+        header, footer {
+            background: #343a40;
+            color: #fff;
+            padding: 1em 2em;
+        }
+        main {
+            padding: 2em;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background: #fff;
+            margin-bottom: 1em;
+            padding: 1em;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .category {
+            font-size: 0.9em;
+            color: #555;
+        }
+        .read {
+            background: #e0e0e0 !important;
+            color: #888;
+        }
+        .read a {
+            color: #888 !important;
+        }
+        .ellipsis-menu {
+            position: absolute;
+            top: 0.7em;
+            right: 1em;
+            font-size: 1.5em;
+            color: #000;
+            cursor: pointer;
+            user-select: none;
+        }
+        .news-item {
+            position: relative;
+        }
+        .menu {
+            position: absolute;
+            top: 2.5em;
+            right: 1em;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            z-index: 10;
+            min-width: 120px;
+        }
+        .menu ul {
+            margin: 0;
+            padding: 0.5em 0;
+            list-style: none;
+        }
+        .menu li {
+            padding: 0.5em 1em;
+            cursor: pointer;
+            color: #333;
+        }
+        .menu li:hover {
+            background: #f0f0f0;
+        }
+        .fetch-news-btn {
+            background: #232526;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 0.6em 1.5em;
+            font-size: 1em;
+            font-weight: 500;
+            box-shadow: none;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            margin-bottom: 1.5em;
+            display: inline-block;
+            letter-spacing: 0.03em;
+            border: 1px solid #333;
+        }
+        .fetch-news-btn:hover {
+            background: #414345;
+            color: #e0e0e0;
+        }
+        .fetch-news-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5em;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>ニュースリスト</div>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="display: inline-flex; align-items: center; margin-right: 8px;">
+                    <!-- ユーザーアイコンSVG -->
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="#FFF" xmlns="http://www.w3.org/2000/svg" onclick="toggleMypageMenu(event)" style="cursor:pointer;">
+                        <circle cx="12" cy="8" r="4" />
+                        <path d="M12 14c-4 0-7 2-7 4v2h14v-2c0-2-3-4-7-4z"/>
+                    </svg>
+                </span>
+                <div class="user-menu menu" style="display: none; position: absolute; right: 2em; top: 4em; z-index: 100;">
+                    <ul>
+                        <li><a href="{% url 'myapp:mypage' %}">マイページ</a></li>
+                        <li><a href="{% url 'myapp:logout' %}">ログアウト</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div>
+            <div class="fetch-news-bar">
+                <form method="post" action="{% url 'myapp:fetch_news' %}" style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="fetch-news-btn">ニュースを取得</button>
+                </form>
+            </div>
+            <div>
+                <form method="post" action="{% url 'myapp:serch_news' %}" style="margin: 0">
+                    {% csrf_token %}
+                    {form.as_p}
+                    <button type="submit" class="fetch-news-btn">ニュースを取得</button>
+                </form>
+
+            </div>
+        </div>
+
+        {% if news_list %}
+            <ul>
+                {% for news in news_list %}
+                    <li id="news-item-{{ news.id }}" class="news-item{% if news.read %} read{% endif %}">
+                        <span class="ellipsis-menu" onclick="toggleMenu(event, {{ news.id }})">︙</span>
+                        <div class="menu" id="menu-{{ news.id }}" style="display: none;">
+                            <ul>
+                                {% if news.read %}
+                                    <li><a onclick="deleteAsRead({{ news.id }}, event)">既読を解除</a></li>
+                                {% else %}
+                                    <li><a onclick="markAsRead({{ news.id }}, event)">既読にする</a></li>
+                                {% endif %}
+                                {% if news.favorite %}
+                                    <li><a onclick="deleteAsFavorite({{ news.id }}, event)">お気に入りから削除</a></li>
+                                {% else %}
+                                    <li><a onclick="markAsFavorite({{ news.id }}, event)">お気に入りに追加</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        <span id="favorite-mark-{{ news.id }}">
+                            {% if news.favorite %}★ お気に入り{% endif %}
+                        </span>
+                        <br>
+                        <a href="{{ news.link }}" target="_blank" onclick="markAsRead({{ news.id }}, event)">
+                            {{ news.title }}
+                        </a>
+                          <br>
+                        <span class="category">
+                            {{ news.pubdate }}
+                        </span>
+                        <br>
+                        <details>
+                            <summary>関連</summary>
+                            {{ news.description|safe }}
+                        </details>
+                        <br>
+                        <span id="read-mark-{{ news.id }}">
+                            {% if news.read %}✔ 既読{% endif %}
+                        </span>
+                        <br>
+                        <span class="category">カテゴリ: {{ news.category }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>ニュースはありません。</p>
+        {% endif %}
+    </main>
+    <footer>
+        &copy; 2024 ニュースアプリ
+    </footer>
+    <script>
+        function markAsRead(newsId, event) {
+          if (event) event.stopPropagation();
+          fetch("{% url 'myapp:mark_read' %}", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": "{{ csrf_token }}",
+            },
+            body: JSON.stringify({ id: newsId }),
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              document.getElementById("read-mark-" + newsId).textContent = "✔ 既読";
+              document.getElementById("news-item-" + newsId).classList.add("read");
+              // メニュー切り替え
+              const menuUl = document.querySelector(`#menu-${newsId} ul`);
+              menuUl.innerHTML = `<li><a onclick=\"deleteAsRead(${newsId}, event)\">既読を解除</a></li>` +
+                (document.getElementById("favorite-mark-" + newsId).textContent ?
+                  `<li><a onclick=\"deleteAsFavorite(${newsId}, event)\">お気に入りから削除</a></li>` :
+                  `<li><a onclick=\"markAsFavorite(${newsId}, event)\">お気に入りに追加</a></li>`);
+            }
+          });
+        }
+
+        function markAsFavorite(newsId, event) {
+            if (event) event.stopPropagation();
+            fetch("{% url 'myapp:mark_favorite' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}",
+                },
+                body: JSON.stringify({ id: newsId }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById("favorite-mark-" + newsId).textContent = "★ お気に入り";
+                    // メニュー切り替え
+                    const menuUl = document.querySelector(`#menu-${newsId} ul`);
+                    menuUl.innerHTML = (document.getElementById("read-mark-" + newsId).textContent ?
+                      `<li><a onclick=\"deleteAsRead(${newsId}, event)\">既読を解除</a></li>` :
+                      `<li><a onclick=\"markAsRead(${newsId}, event)\">既読にする</a></li>`) +
+                      `<li><a onclick=\"deleteAsFavorite(${newsId}, event)\">お気に入りから削除</a></li>`;
+                }
+            });
+        }
+
+        function deleteAsFavorite(newsId, event) {
+            if (event) event.stopPropagation();
+            fetch("{% url 'myapp:delete_favorite' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}",
+                },
+                body: JSON.stringify({ id: newsId }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById("favorite-mark-" + newsId).textContent = "";
+                    // メニュー切り替え
+                    const menuUl = document.querySelector(`#menu-${newsId} ul`);
+                    menuUl.innerHTML = (document.getElementById("read-mark-" + newsId).textContent ?
+                      `<li><a onclick=\"deleteAsRead(${newsId}, event)\">既読を解除</a></li>` :
+                      `<li><a onclick=\"markAsRead(${newsId}, event)\">既読にする</a></li>`) +
+                      `<li><a onclick=\"markAsFavorite(${newsId}, event)\">お気に入りに追加</a></li>`;
+                }
+            });
+        }
+
+        function deleteAsRead(newsId, event) {
+            if (event) event.stopPropagation();
+            fetch("{% url 'myapp:delete_read' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}",
+                },
+                body: JSON.stringify({ id: newsId }),
+            })
+            .then(response => response.json())
+            .then(data => { 
+                if (data.success) {
+                    document.getElementById("read-mark-" + newsId).textContent = "";
+                    document.getElementById("news-item-" + newsId).classList.remove("read");
+                    // メニュー切り替え
+                    const menuUl = document.querySelector(`#menu-${newsId} ul`);
+                    menuUl.innerHTML = `<li><a onclick=\"markAsRead(${newsId}, event)\">既読にする</a></li>` +
+                      (document.getElementById("favorite-mark-" + newsId).textContent ?
+                        `<li><a onclick=\"deleteAsFavorite(${newsId}, event)\">お気に入りから削除</a></li>` :
+                        `<li><a onclick=\"markAsFavorite(${newsId}, event)\">お気に入りに追加</a></li>`);
+                }
+            });
+        }
+
+        function toggleMenu(event, newsId) {
+            event.stopPropagation();
+            const menu = document.getElementById("menu-" + newsId);
+            if (menu.style.display === "none" || menu.style.display === "") {
+                // 他のメニューを閉じる
+                document.querySelectorAll('.menu').forEach(m => {
+                    if (m.id !== "menu-" + newsId && !m.classList.contains('user-menu')) m.style.display = "none";
+                });
+                menu.style.display = "block";
+            } else {
+                menu.style.display = "none";
+            }
+        }
+
+        function toggleMypageMenu(event) {
+            event.stopPropagation();
+            const menu = document.querySelector('.user-menu');
+            if (menu.style.display === "none" || menu.style.display === "") {
+                menu.style.display = "block";
+            } else {
+                menu.style.display = "none";
+            }
+        }
+
+        // ページ全体クリックでメニューを閉じる
+        document.addEventListener('click', function(e) {
+            // ユーザーアイコンまたはメニュー自体をクリックした場合は閉じない
+            const userMenu = document.querySelector('.user-menu');
+            if (userMenu && userMenu.contains(e.target)) {
+                return;
+            }
+            if (userMenu) userMenu.style.display = "none";
+            // ニュースのメニューも閉じる
+            document.querySelectorAll('.menu').forEach(m => {
+                if (!m.classList.contains('user-menu')) m.style.display = "none";
+            });
+        });
+    </script>
+</body>
+
+</html>

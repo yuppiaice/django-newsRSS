@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>マイページ</title>
+</head>
+<body>
+    <header>
+        <h1>マイページ</h1>
+    </header>
+    <main>
+        <h2>ユーザー情報</h2>
+        <p>ユーザー名: {{ user.username }}</p>
+        <p>ユーザーID: {{ user.id }}</p>
+        <p>メールアドレス: {{ user.email }}</p>
+        <p>ニュースの総数: {{ news_count }}</p>
+        <p>既読ニュース数: {{ read_count }}</p>
+        <p>お気に入りニュース数: {{ favorite_count }}</p>
+        
+        <a href="{% url 'myapp:logout' %}">ログアウト</a>
+    </main>
+    <footer>
+        &copy; 2024 ニュースアプリ
+    </footer>
+</body>
+</html>
+
+
