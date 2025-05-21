@@ -1,91 +1,90 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>新規登録</title>
     <style>
-        body {
-            font-family: 'Segoe UI', 'ヒラギノ角ゴ ProN', 'Hiragino Kaku Gothic ProN', 'メイリオ', Meiryo, sans-serif;
-            background: #f7f7fa;
-            margin: 0;
-            padding: 0;
-            color: #222;
-        }
-        .signup-container {
-            max-width: 400px;
-            margin: 3rem auto;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-            padding: 2.5rem 2rem 2rem 2rem;
-        }
-        h2 {
-            text-align: center;
-            color: #343a40;
-            margin-bottom: 1.5rem;
-        }
-        p {
-            text-align: center;
-            color: #555;
-            margin-bottom: 2rem;
-        }
-        label {
-            font-weight: bold;
-        }
-        input[type="text"], input[type="email"], input[type="password"] {
-            width: 100%;
-            padding: 0.7em;
-            margin-top: 0.3em;
-            margin-bottom: 1.2em;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 1em;
-        }
-        button[type="submit"] {
-            width: 100%;
-            background: #343a40;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            padding: 0.8em 0;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 0.5em;
-            transition: background 0.2s;
-        }
-        button[type="submit"]:hover {
-            background: #23272b;
-        }
-        a {
-            display: block;
-            text-align: center;
-            margin-top: 1.5rem;
-            color: #343a40;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
+      body {
+        font-family: 'Segoe UI', 'ヒラギノ角ゴ ProN', 'Hiragino Kaku Gothic ProN', 'メイリオ', Meiryo, sans-serif;
+        background: #f7f7fa;
+        margin: 0;
+        padding: 0;
+        color: #222;
+      }
+      .signup-container {
+        max-width: 400px;
+        margin: 3rem auto;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+        padding: 2.5rem 2rem 2rem 2rem;
+      }
+      h2 {
+        text-align: center;
+        color: #343a40;
+        margin-bottom: 1.5rem;
+      }
+      p {
+        text-align: center;
+        color: #555;
+        margin-bottom: 2rem;
+      }
+      label {
+        font-weight: bold;
+      }
+      input[type='text'],
+      input[type='email'],
+      input[type='password'] {
+        width: 100%;
+        padding: 0.7em;
+        margin-top: 0.3em;
+        margin-bottom: 1.2em;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 1em;
+      }
+      button[type='submit'] {
+        width: 100%;
+        background: #343a40;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        padding: 0.8em 0;
+        font-size: 1.1em;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 0.5em;
+        transition: background 0.2s;
+      }
+      button[type='submit']:hover {
+        background: #23272b;
+      }
+      a {
+        display: block;
+        text-align: center;
+        margin-top: 1.5rem;
+        color: #343a40;
+        text-decoration: none;
+        font-weight: bold;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="signup-container">
-        <h2>新規登録</h2>
-        <p>ユーザー名・メールアドレス・パスワードを入力して新規登録してください。</p>
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">新規登録</button>
-        </form>
-        <a href="{% url 'myapp:login' %}">ログインはこちら</a>
+      <h2>新規登録</h2>
+      <p>ユーザー名・メールアドレス・パスワードを入力して新規登録してください。</p>
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">新規登録</button>
+      </form>
+      <a href="{% url 'myapp:login' %}">ログインはこちら</a>
     </div>
-    <footer>
-        &copy;
-    </footer>
-    <script>
-    </script>
-</body>
+    <footer>&copy;</footer>
+    <script></script>
+  </body>
 </html>

@@ -1,4 +1,3 @@
-myapp/__pycache__/
-myapp/migrations/
-conf/__pycache__/
-conf/urls.cpython-313.pyc
+*.log
+*.pot
+*.pyc

@@ -230,8 +230,8 @@
                 </span>
                 <div class="user-menu menu" style="display: none; position: absolute; right: 2em; top: 4em; z-index: 100;">
                     <ul>
-                        <li><a href="{% url 'myapp:mypage' %}">マイページ</a></li>
-                        <li><a href="{% url 'myapp:logout' %}">ログアウト</a></li>
+                        <a href="{% url 'myapp:mypage' %}"><li>マイページ</li></a>
+                        <a href="{% url 'myapp:logout' %}"><li>ログアウト</li></a>
                     </ul>
                 </div>
             </div>
@@ -244,6 +244,7 @@
                     {% csrf_token %}
                     <button type="submit" class="fetch-news-btn">ニュースを取得</button>
                 </form>
+                <a href="{% url 'myapp:ranking' %}" class="fetch-news-btn" style="text-align:center; margin-left: 1em; ">ランキング</a>
             </div>
             <div>
                 <form method="post" action="{% url 'myapp:search_news' %}" class="search-form-bar" style="margin: 0;">
@@ -272,7 +273,7 @@
                             検索
                         </span>
                     </button>
-                    <a href="{% url 'myapp:home' %}" class="fetch-news-btn reset-btn" style="text-align:center; text-decoration:none; line-height:2.2em; margin-left: auto;">
+                    <a href="{% url 'myapp:home' %}" class="fetch-news-btn reset-btn" style="text-align:center; text-decoration:none; margin-left: 2em;">
                         リセット
                     </a>
                 </form>
@@ -324,16 +325,16 @@
                         <div class="menu" id="menu-{{ news.id }}" style="display: none;">
                             <ul>
                                 {% if news.read %}
-                                    <li><a onclick="deleteAsRead({{ news.id }}, event)">既読を解除</a></li>
+                                    <a onclick="deleteAsRead({{ news.id }}, event)"><li>既読を解除</li></a>
                                 {% else %}
-                                    <li><a onclick="markAsRead({{ news.id }}, event)">既読にする</a></li>
+                                    <a onclick="markAsRead({{ news.id }}, event)"><li>既読にする</li></a>
                                 {% endif %}
                                 {% if news.favorite %}
-                                    <li><a onclick="deleteAsFavorite({{ news.id }}, event)">お気に入りから削除</a></li>
+                                    <a onclick="deleteAsFavorite({{ news.id }}, event)"><li>お気に入りから削除</li></a>
                                 {% else %}
-                                    <li><a onclick="markAsFavorite({{ news.id }}, event)">お気に入りに追加</a></li>
+                                    <a onclick="markAsFavorite({{ news.id }}, event)"><li>お気に入りに追加</li></a>
                                 {% endif %}
-                                <li><a onclick="deleteAsNews({{ news.id }}, event)">記事を削除</a></li>
+                                <a onclick="deleteAsNews({{ news.id }}, event)"><li>記事を削除</li></a>
                             </ul>
                         </div>
                         <span id="favorite-mark-{{ news.id }}">
@@ -392,7 +393,7 @@
               // メニュー切り替え
               const menuUl = document.querySelector(`#menu-${newsId} ul`);
               menuUl.innerHTML = `<li><a onclick=\"deleteAsRead(${newsId}, event)\">既読を解除</a></li>` +
-                (document.getElementById("favorite-mark-" + newsId).textContent ?
+                (document.getElementById("favorite-mark-" + (newsId)).textContent ?
                   `<li><a onclick=\"deleteAsFavorite(${newsId}, event)\">お気に入りから削除</a></li>` :
                   `<li><a onclick=\"markAsFavorite(${newsId}, event)\">お気に入りに追加</a></li>`);
             }

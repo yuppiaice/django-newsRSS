@@ -292,8 +292,8 @@ def calc_score(read_count, favorite_count, read_and_favorite_count, pubdate):
     # 時間減衰係数（逆数関数にオフセットを追加）
     # days + time_decay_offset とすることで、days=0 のゼロ除算を防ぎ、
     # 初期の減衰を滑らかにします。time_decay_offset を大きくすると減衰が緩やかになります。
-    time_decay_offset = 1.9876 # 例: 1.0, 2.0, 3.0 など。公開初日を days=0 とした場合、分母は 2.0 になる。
-    time_factor = 1.0 / (days + time_decay_offset)
+    time_decay_offset = 1.197 # 例: 1.0, 2.0, 3.0 など。公開初日を days=0 とした場合、分母は 2.0 になる。
+    time_factor = (1.0 / (days + time_decay_offset) )
 
     # 最終スコア = エンゲージメントスコア * 時間減衰係数　*10
     score = engagement_score * time_factor * 10
