@@ -246,7 +246,7 @@
                 </form>
             </div>
             <div>
-                <form method="post" action="{% url 'myapp:serch_news' %}" class="search-form-bar" style="margin: 0;">
+                <form method="post" action="{% url 'myapp:search_news' %}" class="search-form-bar" style="margin: 0;">
                     {% csrf_token %}
                     <div>
                         <label for="id_query">🔍 検索</label>
@@ -333,6 +333,7 @@
                                 {% else %}
                                     <li><a onclick="markAsFavorite({{ news.id }}, event)">お気に入りに追加</a></li>
                                 {% endif %}
+                                <li><a onclick="deleteAsNews({{ news.id }}, event)">記事を削除</a></li>
                             </ul>
                         </div>
                         <span id="favorite-mark-{{ news.id }}">
@@ -370,6 +371,7 @@
         </div>
     </main>
     <footer>
+        &copy;
     </footer>
     <script>
         function markAsRead(newsId, event) {
@@ -492,6 +494,24 @@
             } else {
                 menu.style.display = "none";
             }
+        }
+
+        function deleteAsNews(newsId, event) {
+            if (event) event.stopPropagation();
+            fetch("{% url 'myapp:delete_news' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json", 
+                    "X-CSRFToken": "{{ csrf_token }}",
+                },
+                body: JSON.stringify({ id: newsId }),
+            })
+            .then(response => response.json())
+            .then(data => { 
+                if (data.success) {
+                    document.getElementById("news-item-" + newsId).remove();
+                }
+            });
         }
 
         // ページ全体クリックでメニューを閉じる

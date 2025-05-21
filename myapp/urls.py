@@ -17,6 +17,8 @@ urlpatterns = [
     path('delete_read/', views.delete_read, name='delete_read'),
     path('mark_favorite/', views.mark_favorite, name='mark_favorite'),
     path('delete_favorite/', views.delete_favorite, name='delete_favorite'),
-    path('serch_news/', views.serch_news, name='serch_news'),
+    path('search_news/', views.search_news, name='search_news'),
     path('default_setting/', views.default_setting, name='default_setting'),
+    path('delete_news/', views.delete_news, name='delete_news'),
+    path('ranking/', views.ranking, name='ranking'),
 ]
