@@ -23,4 +23,6 @@ urlpatterns = [
     path('default_setting/', views.default_setting, name='default_setting'),
     path('delete_news/', views.delete_news, name='delete_news'),
     path('ranking/', views.ranking, name='ranking'),
+    path('news/<int:news_id>/', views.news_info, name='news_info'),
+    path('share/', views.share_news, name='share_news'),
 ]

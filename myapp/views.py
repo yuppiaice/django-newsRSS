@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from .forms import DefaultSettingForm
 from django.contrib.auth.forms import UserCreationForm
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .forms import CustomUserCreationForm, EmailAuthenticationForm, SearchNewsForm
@@ -14,6 +14,7 @@ import requests
 import json
 from django.db.models import Count, Q
 import datetime
+from django.views.decorators.csrf import csrf_exempt
 
 @login_required
 def home(request):
@@ -257,7 +258,7 @@ def default_setting(request):
 #     return base / days
 
 # v2
-def calc_score(read_count, favorite_count, read_and_favorite_count, pubdate):
+def calc_score(read_count, favorite_count, read_and_favorite_count, pubdate, shared):
     """
     より高度なスコアリング計算式 V2:
     改善された時間減衰と追加エンゲージメント要素を含む (線形加算ベース)
@@ -282,12 +283,13 @@ def calc_score(read_count, favorite_count, read_and_favorite_count, pubdate):
     weight_read = 0.831  # 既読のみの基本的な価値
     weight_favorite = 2.525 # お気に入りの価値 (既読より高めに設定)
     weight_read_and_favorite = 3.594 # 既読かつお気に入りの特別な価値 (他の行動よりかなり高めに設定)
+    weight_shared = 3.939
 
     # 基本エンゲージメントスコア（各行動の重み付け和）
     # read_and_favorite_count は read_count や favorite_count と重複しますが、
     # ここでは「既読とお気に入りの両方をした」という行動自体に高い価値があるとして、
     # 元の式の構造に合わせて別途加算する形を維持します。
-    engagement_score = (read_count * weight_read + favorite_count * weight_favorite + read_and_favorite_count * weight_read_and_favorite)
+    engagement_score = (read_count * weight_read + favorite_count * weight_favorite + read_and_favorite_count * weight_read_and_favorite + shared * weight_shared)
 
     # 時間減衰係数（逆数関数にオフセットを追加）
     # days + time_decay_offset とすることで、days=0 のゼロ除算を防ぎ、
@@ -306,7 +308,7 @@ def ranking(request):
     # タイトル・リンクごとに集計
     qs = (
         RssNews.objects
-        .values('title', 'link', 'pubdate', 'description', 'category', 'pubdate')
+        .values('title', 'link', 'pubdate', 'description', 'category', 'pubdate', 'shared')
         .annotate(
             read_count=Count('id', filter=Q(read=True)),
             favorite_count=Count('id', filter=Q(favorite=True)),
@@ -320,7 +322,8 @@ def ranking(request):
             news['read_count'],
             news['favorite_count'],
             news['read_and_favorite_count'],
-            news['pubdate']
+            news['pubdate'],
+            news['shared']
         )
         news['score'] = score
         ranking.append(news)
@@ -330,3 +333,24 @@ def ranking(request):
 
 def root_redirect(request):
     return redirect('/myapp/home')
+
+
+
+#共有されたニュースを表示
+def news_info(request, news_id):
+    news = get_object_or_404(RssNews, id=news_id, user=request.user)
+    return render(request, 'myapp/news_info.html', {'news': news})
+
+@login_required
+def share_news(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        news_id = data.get("id")
+        try:
+            news = RssNews.objects.get(id=news_id, user=request.user)
+            news.shared += 1
+            news.save()
+            return JsonResponse({"success": True, "shared": news.shared})
+        except RssNews.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Not found"})
+    return JsonResponse({"success": False, "error": "Invalid request"})

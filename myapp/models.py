@@ -15,6 +15,8 @@ class RssNews(models.Model):
     category = models.CharField(max_length=100)
     read = models.BooleanField(default=False)
     favorite = models.BooleanField(default=False)
+    shared = models.IntegerField(default=0)
+    
 
     def __str__(self):
         return self.title
@@ -22,3 +24,4 @@ class RssNews(models.Model):
 class DefaultSetting(models.Model):
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     default_filter = models.CharField(max_length=100, default='all')
+

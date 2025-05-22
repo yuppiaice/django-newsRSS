@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ news.title }} | ニュース詳細</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f8f9fa;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 700px;
+        margin: 2em auto;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        padding: 2em;
+      }
+      h1 {
+        font-size: 2em;
+        margin-bottom: 0.5em;
+      }
+      .meta {
+        color: #555;
+        margin-bottom: 1em;
+      }
+      .category {
+        font-size: 1em;
+        color: #888;
+      }
+      .news-image {
+        max-width: 100%;
+        border-radius: 6px;
+        margin-bottom: 1em;
+      }
+      .description {
+        margin: 1.5em 0;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+      }
+      li {
+        background: #fff;
+        margin-bottom: 1em;
+        padding: 1em;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+      a {
+        color: #007bff;
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      .back-link {
+        display: inline-block;
+        margin-top: 2em;
+        color: #343a40;
+        background: #e0e0e0;
+        padding: 0.5em 1em;
+        border-radius: 4px;
+        text-decoration: none;
+      }
+      .back-link:hover {
+        background: #d0d0d0;
+      }
+      .read-more-link {
+        display: inline-block;
+        margin-top: 1.5rem;
+        padding: 0.6em 1.5em;
+        background: #343a40;
+        color: #fff;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: background 0.2s;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>{{ news.title }}</h1>
+      <div class="meta">
+        <span>{{ news.pubdate }}</span> |
+        <span class="category">カテゴリ: {{ news.category }}</span>
+      </div>
+      <div>
+        共有数: <span id="shared-count">{{ news.shared }}</span>
+      </div>
+
+      <br />
+      <details>
+        <summary>関連</summary>
+        {{ news.description|safe }}
+      </details>
+      <br />
+      <a class="read-more-link" onclick="shareNews({{ news.id }})" href="javascript:void(0);">元記事を読む</a>
+      <br />
+      <a href="javascript:history.back()" class="back-link">← 戻る</a>
+    </div>
+    <script>
+      function shareNews(newsId) {
+        let sharedKey = 'shared_news_' + newsId
+        if (localStorage.getItem(sharedKey)) {
+          // 2回目以降はカウントを増やさず、リンクだけ開く
+          window.open('{{ news.link }}', '_blank')
+          return
+        }
+        fetch('/myapp/share/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: JSON.stringify({ id: newsId })
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              // 共有数を+1して表示を更新
+              document.getElementById('shared-count').textContent = data.shared
+              localStorage.setItem(sharedKey, '1')
+            }
+            // 元記事を新しいタブで開く
+            window.open('{{ news.link }}', '_blank')
+          })
+          .catch((error) => {
+            // エラー時もリンクは開く
+            window.open('{{ news.link }}', '_blank')
+          })
+      }
+    </script>
+  </body>
+</html>
