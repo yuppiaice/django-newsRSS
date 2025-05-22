@@ -197,7 +197,17 @@
                 min-width: unset;
             }
             .search-form-bar input[type="text"] {
-                width: 100%;
+                width: 90%;
+            }
+            #filter-select {
+                width: 90%;
+            }
+            .news-item {
+                padding-top: 2.5em;
+            }
+            .ellipsis-menu {
+                top: 0.2em;
+                right: 0.7em;
             }
         }
         #back-to-top a {
@@ -212,6 +222,22 @@
         }
         #back-to-top a:hover {
             background: #007bff;
+        }
+        #filter-select {
+            padding: 0.5em 1.2em;
+            border-radius: 6px;
+            border: 1px solid #bbb;
+            background: #f7f7fa;
+            font-size: 1em;
+            color: #333;
+            transition: border 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            outline: none;
+            margin-left: 0.5em;
+        }
+        #filter-select:focus {
+            border: 1.5px solid #007bff;
+            box-shadow: 0 0 0 2px #007bff22;
         }
     </style>
 </head>
