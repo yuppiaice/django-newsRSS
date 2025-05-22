@@ -11,9 +11,16 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+import environ
+from decouple import config
+from dj_database_url import parse as dburl
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+env = environ.Env()
+env.read_env(os.path.join(BASE_DIR, ".env"))
 
 
 # Quick-start development settings - unsuitable for production
@@ -26,8 +33,7 @@ SECRET_KEY = 'django-insecure-c!7apedyc3z7x0h_r(sg&qeb*w20^9e7y(xg2_3tn6ioefb3q6
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '*',
-    '.vercel.app'
+    '*'
 ]
 # AUTH_USER_MODEL = 'myapp.User'
 
@@ -44,6 +50,7 @@ INSTALLED_APPS = [
     ]
 
 MIDDLEWARE = [
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -72,20 +79,25 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'conf.wsgi.application'
 
+default_dburl = "sqlite:///" + str(BASE_DIR / "db.sqlite3")
+
+DATABASES = {
+    "default": config("DATABASE_URL", default=default_dburl, cast=dburl),
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'kadai',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres1995',
-        'HOST': 'localhost',
-        'PORT': '',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'kadai',
+#         'USER': 'postgres',
+#         'PASSWORD': 'postgres1995',
+#         'HOST': 'localhost',
+#         'PORT': '',
+#     }
+# }
 
 
 # Password validation
@@ -123,11 +135,17 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = str(BASE_DIR / "staticfiles")
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SUPERUSER_NAME = env("SUPERUSER_NAME")
+SUPERUSER_EMAIL = env("SUPERUSER_EMAIL")
+SUPERUSER_PASSWORD = env("SUPERUSER_PASSWORD")
 
 LOGIN_URL = '/myapp/login/'
 LOGIN_REDIRECT_URL = '/myapp/'  # ログイン後のリダイレクト先
