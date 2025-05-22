@@ -29,7 +29,7 @@ class CustomUserCreationForm(UserCreationForm):
         return user
 
 class EmailAuthenticationForm(forms.Form):
-    email = forms.EmailField(label='メールアドレス')
+    username = forms.CharField(label='ユーザー名')
     password = forms.CharField(widget=forms.PasswordInput, label='パスワード')
 
 class SearchNewsForm(forms.Form):

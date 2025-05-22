@@ -59,10 +59,10 @@ def login(request):
     if request.method == 'POST':
         form = EmailAuthenticationForm(request.POST)
         if form.is_valid():
-            email = form.cleaned_data['email']
+            username = form.cleaned_data['username']
             password = form.cleaned_data['password']
             try:
-                user = User.objects.get(email=email)
+                user = User.objects.get(username=username)
                 from django.contrib.auth import authenticate, login as auth_login
                 user = authenticate(request, username=user.username, password=password)
                 if user is not None:
