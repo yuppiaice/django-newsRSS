@@ -338,10 +338,9 @@ def root_redirect(request):
 
 #共有されたニュースを表示
 def news_info(request, news_id):
-    news = get_object_or_404(RssNews, id=news_id, user=request.user)
+    news = get_object_or_404(RssNews, id=news_id)
     return render(request, 'myapp/news_info.html', {'news': news})
 
-@login_required
 def share_news(request):
     if request.method == "POST":
         data = json.loads(request.body)
