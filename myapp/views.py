@@ -327,3 +327,6 @@ def ranking(request):
     # スコア順にソート
     ranking = sorted(ranking, key=lambda x: x['score'], reverse=True)[:10]
     return render(request, 'myapp/ranking.html', {'ranking': ranking})
+
+def root_redirect(request):
+    return redirect('/myapp/home')
